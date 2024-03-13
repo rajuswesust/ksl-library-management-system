@@ -1,4 +1,5 @@
 rootProject.name = 'ksl-library-management-system'
 include 'user-service'
 include 'book-service'
+include 'api-gateway'
 
