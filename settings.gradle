@@ -1,2 +1,3 @@
 rootProject.name = 'ksl-library-management-system'
+include 'user-service'
 
