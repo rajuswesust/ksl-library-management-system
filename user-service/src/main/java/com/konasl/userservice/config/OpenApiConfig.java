@@ -12,8 +12,8 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI usersMicroserviceOpenAPI() {
         return new OpenAPI()
-                .info(new Info().title("register user")
-                        .description("register new user")
+                .info(new Info().title("user service")
+                        .description("user service apis")
                         .version("1.0"));
     }
 }

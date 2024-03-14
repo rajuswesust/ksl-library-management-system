@@ -2,7 +2,9 @@ package com.konasl.bookservice.controllers;
 
 import com.konasl.bookservice.entity.Book;
 import com.konasl.bookservice.exceptions.CustomException;
+import com.konasl.bookservice.payload.LendBookRequest;
 import com.konasl.bookservice.payload.Message;
+import com.konasl.bookservice.payload.UserLendBookRequest;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,15 +66,27 @@ public class BookController {
         }
     }
 
+    //add book to user's wishlist
     @PostMapping("/user-wishlist/add")
     public ResponseEntity<?> addUserWishlist(@RequestBody WishlistRequest wishlistRequest) {
         System.out.println(wishlistRequest);
         return ResponseEntity.ok(bookService.addBookToWishlist(wishlistRequest));
     }
 
-    //loan book to user
-    //admin
+    //remove a book from wishlist
 
+    //admin
+    //lend a book to user
+    //here id is the admins user' id
+    @PostMapping("/lend")
+    public ResponseEntity<?> lendBook(@RequestBody LendBookRequest lendBookRequest) {
+        System.out.println("lend books: " + lendBookRequest);
+        try {
+            return ResponseEntity.ok(bookService.lendBook(lendBookRequest));
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
+    }
 
     //return book by user
 

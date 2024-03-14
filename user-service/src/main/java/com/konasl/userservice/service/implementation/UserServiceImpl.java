@@ -1,11 +1,8 @@
 package com.konasl.userservice.service.implementation;
 
-import com.konasl.userservice.payload.UserWishlistRequest;
-import com.konasl.userservice.payload.WishlistRequest;
+import com.konasl.userservice.payload.*;
 import com.konasl.userservice.exception.ExceptionClass;
 import com.konasl.userservice.entity.User;
-import com.konasl.userservice.payload.Message;
-import com.konasl.userservice.payload.UserDto;
 import com.konasl.userservice.repository.UserRepository;
 import com.konasl.userservice.service.UserService;
 import org.modelmapper.ModelMapper;
@@ -27,7 +24,7 @@ public class UserServiceImpl implements UserService{
     @Autowired
     private RestTemplate restTemplate;
 
-    private final String userServiceURL = "http://localhost:8082/api/books";
+    private final String bookServiceURL = "http://localhost:8082/api/books";
 
     public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
@@ -96,7 +93,7 @@ public class UserServiceImpl implements UserService{
         if(!userRepository.existsById(userId)) {
             throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
         }
-        String url = userServiceURL + "/user-wishlist/add";
+        String url = bookServiceURL + "/user-wishlist/add";
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         WishlistRequest req = WishlistRequest.builder().bookId(userWishlistRequest.getBook_id()).userId(userId).

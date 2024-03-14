@@ -1,10 +1,7 @@
 package com.konasl.userservice.controllers;
 
-import com.konasl.userservice.payload.UserWishlistRequest;
-import com.konasl.userservice.payload.WishlistRequest;
+import com.konasl.userservice.payload.*;
 import com.konasl.userservice.entity.User;
-import com.konasl.userservice.payload.Message;
-import com.konasl.userservice.payload.UserDto;
 import com.konasl.userservice.service.UserService;
 import com.konasl.userservice.exception.ExceptionClass;
 import org.springframework.http.HttpStatus;
@@ -68,6 +65,7 @@ public class UserController {
        }
     }
 
+    //add a book to users wishlist
     @PostMapping("/{id}/wishlist")
     public ResponseEntity<?> addBookToWishlist(@RequestBody UserWishlistRequest wishlistRequest,
     @PathVariable(name = "id")Long userId) {
@@ -77,4 +75,6 @@ public class UserController {
             return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
         }
     }
+
+    //remove a book from wishlist
 }

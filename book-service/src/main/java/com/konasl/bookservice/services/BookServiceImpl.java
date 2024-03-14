@@ -3,14 +3,17 @@ package com.konasl.bookservice.services;
 import com.konasl.bookservice.entity.Book;
 import com.konasl.bookservice.entity.WishList;
 import com.konasl.bookservice.exceptions.CustomException;
+import com.konasl.bookservice.payload.LendBookRequest;
 import com.konasl.bookservice.payload.Message;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.repository.BookRepository;
 import com.konasl.bookservice.repository.WishlistRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +26,10 @@ public class BookServiceImpl implements BookService{
 
     @Autowired
     private WishlistRepository wishlistRepository;
+
+    @Autowired
+    private RestTemplate restTemplate;
+    private final String userServiceUrl = "http://localhost:8081/api/users";
 
     @Override
     public Book addBook(Book book) {
@@ -86,5 +93,35 @@ public class BookServiceImpl implements BookService{
             wishlistRepository.save(existingList);
         }
         return new Message(book.getTitle() + ", is added to the wishlist!");
+    }
+    @Override
+    public Message lendBook(LendBookRequest lendBookRequest) throws CustomException{
+        try {
+            Long adminId = lendBookRequest.getAdmin_id();
+            Long userId = lendBookRequest.getLend().getUser_id();
+            Long bookId = lendBookRequest.getLend().getBook_id();
+
+            // Check if the admin exists
+            String adminUrl = userServiceUrl + "/" + adminId;
+            restTemplate.getForEntity(adminUrl, String.class);
+
+            // Check if the user exists
+            String userUrl = userServiceUrl + "/" + userId;
+            restTemplate.getForEntity(userUrl, String.class);
+
+            //book exists?
+            Book book = bookRepository.findById(lendBookRequest.getLend().getBook_id()).orElseThrow(()->
+                    new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " does not exists")));
+
+            //any copies available?
+            if(book.getAvailableCopies() == 0) {
+                throw new CustomException(HttpStatus.BAD_REQUEST, new Message("No copies available"));
+            }
+            book.setAvailableCopies(book.getAvailableCopies() - 1);
+            bookRepository.save(book);
+            return new Message("Book lent successfully");
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new CustomException(HttpStatus.NOT_FOUND, new Message("User or admin does not exist"));
+        }
     }
 }

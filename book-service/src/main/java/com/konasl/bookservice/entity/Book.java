@@ -23,6 +23,7 @@ public class Book {
     private String releaseYear;
     private String bookType;    //Genre or category
     private int quantity;
+    private int availableCopies;
     private boolean isAvailable;
 }
 

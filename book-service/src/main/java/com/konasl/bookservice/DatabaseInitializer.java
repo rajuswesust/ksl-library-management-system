@@ -26,6 +26,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 .releaseYear("1925")
                 .bookType("fiction")
                 .quantity(10)
+                .availableCopies(10)
                 .isAvailable(true)
                 .build();
         bookRepository.save(book1);
@@ -37,6 +38,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 .releaseYear("1960")
                 .bookType("fiction")
                 .quantity(8)
+                .availableCopies(8)
                 .isAvailable(true)
                 .build();
         bookRepository.save(book2);
@@ -49,6 +51,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 .releaseYear("1813")
                 .bookType("romance")
                 .quantity(7)
+                .availableCopies(7)
                 .isAvailable(true)
                 .build();
         bookRepository.save(book3);
@@ -61,6 +64,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 .releaseYear("1954")
                 .bookType("fantasy")
                 .quantity(11)
+                .availableCopies(11)
                 .isAvailable(false)
                 .build();
         bookRepository.save(book4);
@@ -72,6 +76,7 @@ public class DatabaseInitializer implements CommandLineRunner {
                 .releaseYear("1997")
                 .bookType("fantasy")
                 .quantity(5)
+                .availableCopies(5)
                 .isAvailable(false)
                 .build();
         bookRepository.save(book5);
