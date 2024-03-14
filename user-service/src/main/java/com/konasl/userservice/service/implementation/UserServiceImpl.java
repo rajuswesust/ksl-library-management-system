@@ -92,7 +92,10 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public ResponseEntity<String> addToWishlist(UserWishlistRequest userWishlistRequest, Long userId) {
+    public ResponseEntity<String> addToWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
+        if(!userRepository.existsById(userId)) {
+            throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
+        }
         String url = userServiceURL + "/user-wishlist/add";
         HttpHeaders headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));

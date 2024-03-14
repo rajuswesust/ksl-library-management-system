@@ -71,7 +71,10 @@ public class UserController {
     @PostMapping("/{id}/wishlist")
     public ResponseEntity<?> addBookToWishlist(@RequestBody UserWishlistRequest wishlistRequest,
     @PathVariable(name = "id")Long userId) {
-        userService.addToWishlist(wishlistRequest, userId);
-        return null;
+        try {
+            return ResponseEntity.ok(userService.addToWishlist(wishlistRequest, userId));
+        } catch (ExceptionClass e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
     }
 }
