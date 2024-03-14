@@ -3,6 +3,7 @@ package com.konasl.bookservice.controllers;
 import com.konasl.bookservice.entity.Book;
 import com.konasl.bookservice.exceptions.CustomException;
 import com.konasl.bookservice.payload.Message;
+import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,6 +62,12 @@ public class BookController {
         } catch (CustomException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
         }
+    }
+
+    @PostMapping("/user-wishlist/add")
+    public ResponseEntity<?> addUserWishlist(@RequestBody WishlistRequest wishlistRequest) {
+        System.out.println(wishlistRequest);
+        return ResponseEntity.ok(bookService.addBookToWishlist(wishlistRequest));
     }
 
     //loan book to user

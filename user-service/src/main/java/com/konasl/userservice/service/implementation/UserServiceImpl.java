@@ -1,5 +1,6 @@
 package com.konasl.userservice.service.implementation;
 
+import com.konasl.userservice.payload.UserWishlistRequest;
 import com.konasl.userservice.payload.WishlistRequest;
 import com.konasl.userservice.exception.ExceptionClass;
 import com.konasl.userservice.entity.User;
@@ -9,13 +10,13 @@ import com.konasl.userservice.repository.UserRepository;
 import com.konasl.userservice.service.UserService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -25,6 +26,8 @@ public class UserServiceImpl implements UserService{
 
     @Autowired
     private RestTemplate restTemplate;
+
+    private final String userServiceURL = "http://localhost:8082/api/books";
 
     public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
         this.userRepository = userRepository;
@@ -89,11 +92,18 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Message addToWishlist(WishlistRequest wishlistRequest) {
-        String url = "http://localhost:8082/api/books";
-        ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+    public ResponseEntity<String> addToWishlist(UserWishlistRequest userWishlistRequest, Long userId) {
+        String url = userServiceURL + "/user-wishlist/add";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        WishlistRequest req = WishlistRequest.builder().bookId(userWishlistRequest.getBook_id()).userId(userId).
+                build();
+        HttpEntity<WishlistRequest> entity = new HttpEntity<>(req, headers);
+
+        System.out.println("requesting to "+ url +": "+ req);
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         System.out.println(response);
-        return new Message("");
+        return response;
     }
 
     private UserDto toUserDto(User newUser) {

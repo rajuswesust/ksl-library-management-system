@@ -1,5 +1,6 @@
 package com.konasl.userservice.controllers;
 
+import com.konasl.userservice.payload.UserWishlistRequest;
 import com.konasl.userservice.payload.WishlistRequest;
 import com.konasl.userservice.entity.User;
 import com.konasl.userservice.payload.Message;
@@ -67,9 +68,10 @@ public class UserController {
        }
     }
 
-    @PostMapping("/wishlist/add")
-    public ResponseEntity<?> addBookToWishlist(@RequestBody WishlistRequest wishlistRequest) {
-        userService.addToWishlist(wishlistRequest);
+    @PostMapping("/{id}/wishlist")
+    public ResponseEntity<?> addBookToWishlist(@RequestBody UserWishlistRequest wishlistRequest,
+    @PathVariable(name = "id")Long userId) {
+        userService.addToWishlist(wishlistRequest, userId);
         return null;
     }
 }
