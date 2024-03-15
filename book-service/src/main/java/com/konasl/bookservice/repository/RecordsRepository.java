@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface RecordsRepository extends JpaRepository<Records, Long> {
     List<Records> findAllByBookIdAndUserId(Long bookId, Long userId);
+    List<Records> findAllByUserId(Long userId);
+    List<Records> findAllByBookId(Long bookId);
+
 }

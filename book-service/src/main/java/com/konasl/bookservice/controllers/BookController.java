@@ -108,9 +108,17 @@ public class BookController {
             return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
         }
     }
-    //get lost books records
+
     //get all records
     //get records of a user
+    //can be filtered by userId, bookId
+    @GetMapping("/records")
+    public ResponseEntity<?> getRecords(@RequestParam(name = "userId", required = false) Long userId,
+                                        @RequestParam(name = "bookId", required = false) Long bookId) {
+        System.out.println("get book record: " + userId+ ", " + bookId);
+        return new ResponseEntity<>(bookService.getRecords(userId, bookId), HttpStatus.OK);
+    }
 
+    //get lost books records
     //what to do if a user lost a book
 }

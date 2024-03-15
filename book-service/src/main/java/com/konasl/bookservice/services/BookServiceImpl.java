@@ -219,5 +219,19 @@ public class BookServiceImpl implements BookService{
         }
     }
 
+    @Override
+    public List<Records> getRecords(Long userId, Long bookId) {
+        List<Records> records;
+        if(userId != null && bookId != null) {
+           records =  recordsRepository.findAllByBookIdAndUserId(userId, bookId);
+        } else if(userId != null) {
+            records = recordsRepository.findAllByUserId(userId);
+        } else if(bookId != null) {
+            records = recordsRepository.findAllByBookId(bookId);
+        } else {
+            records = recordsRepository.findAll();
+        }
+        return records;
+    }
 
 }
