@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -104,6 +105,28 @@ public class UserServiceImpl implements UserService{
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         System.out.println(response);
         return response;
+    }
+
+    @Override
+    public ResponseEntity<String> removeBookFromWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
+        if(!userRepository.existsById(userId)) {
+            throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
+        }
+        String url = bookServiceURL + "/user-wishlist/remove";
+        HttpHeaders headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        WishlistRequest req = WishlistRequest.builder().bookId(userWishlistRequest.getBook_id()).userId(userId).
+                build();
+        HttpEntity<WishlistRequest> entity = new HttpEntity<>(req, headers);
+
+        System.out.println("requesting to "+ url +": "+ req);
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            System.out.println(response);
+            return response;
+        } catch (HttpClientErrorException e) {
+            throw new ExceptionClass((HttpStatus) e.getStatusCode(), new Message("Error occurred while removing book from wishlist"));
+        }
     }
 
     private UserDto toUserDto(User newUser) {

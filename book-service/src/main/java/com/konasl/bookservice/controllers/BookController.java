@@ -73,6 +73,16 @@ public class BookController {
     }
 
     //remove a book from wishlist
+    //add book to user's wishlist
+    @PostMapping("/user-wishlist/remove")
+    public ResponseEntity<?> removeBookFromWishlist(@RequestBody WishlistRequest wishlistRequest) {
+        try {
+            System.out.println("in book service: " + wishlistRequest);
+            return ResponseEntity.ok(bookService.removeBookFromWishlist(wishlistRequest));
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
+    }
 
     //admin
     //lend a book to user
@@ -98,8 +108,9 @@ public class BookController {
             return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
         }
     }
+    //get lost books records
+    //get all records
+    //get records of a user
 
-    //lost books records
-    //return time overdue for a user, users
-
+    //what to do if a user lost a book
 }

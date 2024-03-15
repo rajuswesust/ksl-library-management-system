@@ -77,4 +77,15 @@ public class UserController {
     }
 
     //remove a book from wishlist
+    @PostMapping("/{id}/wishlist/remove-book")
+    public ResponseEntity<?> removeBookFromWishlist(@RequestBody UserWishlistRequest wishlistRequest,
+                                               @PathVariable(name = "id")Long userId) {
+        try {
+            return ResponseEntity.ok(userService.removeBookFromWishlist(wishlistRequest, userId));
+        } catch (ExceptionClass e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
+    }
+
+    //show users borrowed books
 }

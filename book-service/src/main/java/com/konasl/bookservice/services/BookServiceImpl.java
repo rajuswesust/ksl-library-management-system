@@ -85,11 +85,13 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Object addBookToWishlist(WishlistRequest wishlistRequest) {
+    public Object addBookToWishlist(WishlistRequest wishlistRequest) throws CustomException{
         System.out.println("book service: "+ wishlistRequest);
 
         // Retrieve the Book object by its ID
-        Book book = bookRepository.findById(wishlistRequest.getBookId()).orElseThrow();
+        Book book = bookRepository.findById(wishlistRequest.getBookId()).orElseThrow(
+                ()->   new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + wishlistRequest.getBookId() + " does not exists"))
+        );
 
         WishList existingList = wishlistRepository.findByBookId(book.getId());
         WishList newList = WishList.builder().book(book).build();
@@ -103,6 +105,26 @@ public class BookServiceImpl implements BookService{
         }
         return new Message(book.getTitle() + ", is added to the wishlist!");
     }
+
+    @Override
+    public Message removeBookFromWishlist(WishlistRequest wishlistRequest) throws CustomException{
+        Long userId = wishlistRequest.getUserId();
+        Long bookId = wishlistRequest.getBookId();
+
+        // Retrieve the Book object by its ID
+        Book book = bookRepository.findById(bookId).orElseThrow(
+                ()->   new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " does not exists"))
+        );
+
+        WishList existingList = wishlistRepository.findByBookId(book.getId());
+        if(existingList == null) {
+            throw new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " is not in users wishlist"));
+        }
+        existingList.getUserIds().remove(userId);
+        wishlistRepository.save(existingList);
+        return new Message(book.getTitle() + ", is removed from wishlist!");
+    }
+
     @Override
     public Message lendBook(LendReturnBookRequest lendBookRequest) throws CustomException{
         try {

@@ -16,4 +16,6 @@ public interface UserService {
     Message updateUser(Long userId, UserDto userDto) throws ExceptionClass;
 
     ResponseEntity<String> addToWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
+    ResponseEntity<String> removeBookFromWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
+
 }
