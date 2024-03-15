@@ -1,12 +1,15 @@
 package com.konasl.bookservice.services;
 
 import com.konasl.bookservice.entity.Book;
+import com.konasl.bookservice.entity.Records;
 import com.konasl.bookservice.entity.WishList;
+import com.konasl.bookservice.enums.BookRecordStatus;
 import com.konasl.bookservice.exceptions.CustomException;
 import com.konasl.bookservice.payload.LendBookRequest;
 import com.konasl.bookservice.payload.Message;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.repository.BookRepository;
+import com.konasl.bookservice.repository.RecordsRepository;
 import com.konasl.bookservice.repository.WishlistRepository;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +30,9 @@ public class BookServiceImpl implements BookService{
 
     @Autowired
     private WishlistRepository wishlistRepository;
+
+    @Autowired
+    private RecordsRepository recordsRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -119,6 +126,11 @@ public class BookServiceImpl implements BookService{
             }
             book.setAvailableCopies(book.getAvailableCopies() - 1);
             bookRepository.save(book);
+
+            //save as record
+            Records existing = recordsRepository.findByBookId(book.getId());
+            Records x = Records.builder().book(book).lentDate(LocalDate.now()).status(BookRecordStatus.DUE).userId(userId).build();
+            recordsRepository.save(x);
             return new Message("Book lent successfully");
         } catch (HttpClientErrorException.NotFound e) {
             throw new CustomException(HttpStatus.NOT_FOUND, new Message("User or admin does not exist"));
