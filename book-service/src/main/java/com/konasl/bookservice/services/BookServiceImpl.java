@@ -5,7 +5,8 @@ import com.konasl.bookservice.entity.Records;
 import com.konasl.bookservice.entity.WishList;
 import com.konasl.bookservice.enums.BookRecordStatus;
 import com.konasl.bookservice.exceptions.CustomException;
-import com.konasl.bookservice.payload.LendBookRequest;
+import com.konasl.bookservice.payload.BookReturnResponse;
+import com.konasl.bookservice.payload.LendReturnBookRequest;
 import com.konasl.bookservice.payload.Message;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.repository.BookRepository;
@@ -21,6 +22,7 @@ import org.springframework.web.client.RestTemplate;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class BookServiceImpl implements BookService{
@@ -102,11 +104,11 @@ public class BookServiceImpl implements BookService{
         return new Message(book.getTitle() + ", is added to the wishlist!");
     }
     @Override
-    public Message lendBook(LendBookRequest lendBookRequest) throws CustomException{
+    public Message lendBook(LendReturnBookRequest lendBookRequest) throws CustomException{
         try {
             Long adminId = lendBookRequest.getAdmin_id();
-            Long userId = lendBookRequest.getLend().getUser_id();
-            Long bookId = lendBookRequest.getLend().getBook_id();
+            Long userId = lendBookRequest.getInfo().getUser_id();
+            Long bookId = lendBookRequest.getInfo().getBook_id();
 
             // Check if the admin exists
             String adminUrl = userServiceUrl + "/" + adminId;
@@ -117,18 +119,27 @@ public class BookServiceImpl implements BookService{
             restTemplate.getForEntity(userUrl, String.class);
 
             //book exists?
-            Book book = bookRepository.findById(lendBookRequest.getLend().getBook_id()).orElseThrow(()->
+            Book book = bookRepository.findById(bookId).orElseThrow(()->
                     new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " does not exists")));
 
             //any copies available?
             if(book.getAvailableCopies() == 0) {
                 throw new CustomException(HttpStatus.BAD_REQUEST, new Message("No copies available"));
             }
+
+            //if the user already borrowed the book
+            List<Records> records = recordsRepository.findAllByBookIdAndUserId(bookId, userId);
+            List<Records> filteredRecords = records.stream()
+                    .filter(record -> record.getReturnTime() == null
+                            && record.getStatus() == BookRecordStatus.DUE)
+                    .toList();
+            if(!filteredRecords.isEmpty()) {
+                throw new CustomException(HttpStatus.FORBIDDEN, new Message("User Already borrowed this book"));
+            }
             book.setAvailableCopies(book.getAvailableCopies() - 1);
             bookRepository.save(book);
 
             //save as record
-            Records existing = recordsRepository.findByBookId(book.getId());
             Records x = Records.builder().book(book).lentDate(LocalDate.now()).status(BookRecordStatus.DUE).userId(userId).build();
             recordsRepository.save(x);
             return new Message("Book lent successfully");
@@ -136,4 +147,55 @@ public class BookServiceImpl implements BookService{
             throw new CustomException(HttpStatus.NOT_FOUND, new Message("User or admin does not exist"));
         }
     }
+
+    @Override
+    public BookReturnResponse returnBook(LendReturnBookRequest lendBookRequest) throws CustomException {
+        try {
+            Long adminId = lendBookRequest.getAdmin_id();
+            Long userId = lendBookRequest.getInfo().getUser_id();
+            Long bookId = lendBookRequest.getInfo().getBook_id();
+
+            // Check if the admin exists
+            String adminUrl = userServiceUrl + "/" + adminId;
+            restTemplate.getForEntity(adminUrl, String.class);
+
+            // Check if the user exists
+            String userUrl = userServiceUrl + "/" + userId;
+            restTemplate.getForEntity(userUrl, String.class);
+
+            //book exists?
+            Book book = bookRepository.findById(bookId).orElseThrow(()->
+                    new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " does not exists")));
+
+            //any copies available?
+            if(book.getAvailableCopies() == book.getQuantity()) {
+                throw new CustomException(HttpStatus.BAD_REQUEST, new Message("All the copies has been returned already"));
+            }
+
+            //update the record
+            List<Records> records = recordsRepository.findAllByBookIdAndUserId(bookId, userId);
+            List<Records> filteredRecords = records.stream()
+                    .filter(record -> record.getReturnTime() == null
+                            && record.getStatus() == BookRecordStatus.DUE)
+                    .toList();
+
+            if(filteredRecords.size() != 1) {
+                throw new CustomException(HttpStatus.BAD_REQUEST, new Message("No such previous record found"));
+            }
+            filteredRecords.get(0).setReturnTime(LocalDate.now());
+            filteredRecords.get(0).setStatus(BookRecordStatus.RETURNED);
+            filteredRecords.get(0).calculateFine();
+            recordsRepository.save(filteredRecords.get(0));
+
+            book.setAvailableCopies(book.getAvailableCopies() + 1);
+            bookRepository.save(book);
+            return BookReturnResponse.builder().message(new Message("Book returned successfully"))
+                    .fine(filteredRecords.get(0).getFine())
+                    .build();
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new CustomException(HttpStatus.NOT_FOUND, new Message("User or admin does not exist"));
+        }
+    }
+
+
 }

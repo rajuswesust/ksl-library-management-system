@@ -2,9 +2,8 @@ package com.konasl.bookservice.controllers;
 
 import com.konasl.bookservice.entity.Book;
 import com.konasl.bookservice.exceptions.CustomException;
-import com.konasl.bookservice.payload.LendBookRequest;
+import com.konasl.bookservice.payload.LendReturnBookRequest;
 import com.konasl.bookservice.payload.Message;
-import com.konasl.bookservice.payload.UserLendBookRequest;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.services.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,7 +78,7 @@ public class BookController {
     //lend a book to user
     //here id is the admins user' id
     @PostMapping("/lend")
-    public ResponseEntity<?> lendBook(@RequestBody LendBookRequest lendBookRequest) {
+    public ResponseEntity<?> lendBook(@RequestBody LendReturnBookRequest lendBookRequest) {
         System.out.println("lend books: " + lendBookRequest);
         try {
             return ResponseEntity.ok(bookService.lendBook(lendBookRequest));
@@ -88,7 +87,17 @@ public class BookController {
         }
     }
 
-    //return book by user
+    //return book
+    //admin
+    @PostMapping("/return-book")
+    public ResponseEntity<?> returnBook(@RequestBody LendReturnBookRequest returnBookRequest) {
+        System.out.println("return book: "+ returnBookRequest);
+        try {
+            return ResponseEntity.ok(bookService.returnBook(returnBookRequest));
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
+    }
 
     //lost books records
     //return time overdue for a user, users
