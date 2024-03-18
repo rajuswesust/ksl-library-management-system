@@ -21,5 +21,5 @@ public interface BookService {
     Message removeBookFromWishlist(WishlistRequest wishlistRequest) throws CustomException;
     Message lendBook(LendReturnBookRequest lendBookRequest) throws CustomException;
     BookReturnResponse returnBook(LendReturnBookRequest lendBookRequest) throws CustomException;
-    List<Records> getRecords(Long userId, Long bookId);
+    List<Records> getRecords(Long userId, Long bookId, String status)  throws CustomException;
 }

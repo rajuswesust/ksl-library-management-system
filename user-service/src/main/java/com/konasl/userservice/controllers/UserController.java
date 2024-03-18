@@ -87,6 +87,5 @@ public class UserController {
         }
     }
 
-    //show users borrowed books
-
+    //show user's borrowed books records
 }

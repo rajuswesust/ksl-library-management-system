@@ -220,14 +220,26 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public List<Records> getRecords(Long userId, Long bookId) {
+    public List<Records> getRecords(Long userId, Long bookId, String status) throws CustomException{
+        BookRecordStatus bookRecordStatus = null;
+        if(status != null && status.equals("due")) {
+            bookRecordStatus = BookRecordStatus.DUE;
+        } else if(status != null && status.equals("returned")) {
+            bookRecordStatus = BookRecordStatus.RETURNED;
+        } else if(status != null && status.equals("lost")) {
+            bookRecordStatus = BookRecordStatus.LOST;
+        } else if (status != null) {
+            throw new CustomException(HttpStatus.BAD_REQUEST, new Message("No such status as " + status));
+        }
         List<Records> records;
-        if(userId != null && bookId != null) {
-           records =  recordsRepository.findAllByBookIdAndUserId(userId, bookId);
+        if(userId != null && bookId != null && bookRecordStatus != null) {
+           records =  recordsRepository.findByBookIdAndUserIdAndStatus(userId, bookId, bookRecordStatus);
         } else if(userId != null) {
             records = recordsRepository.findAllByUserId(userId);
         } else if(bookId != null) {
             records = recordsRepository.findAllByBookId(bookId);
+        } else if(status != null){
+            records = recordsRepository.findAllByStatus(bookRecordStatus);
         } else {
             records = recordsRepository.findAll();
         }
