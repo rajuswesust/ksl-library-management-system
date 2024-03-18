@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class LendReturnDto {
     Long user_id;
     Long book_id;
+    Boolean is_lost;
 }

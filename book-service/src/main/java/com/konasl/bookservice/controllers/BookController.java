@@ -124,5 +124,7 @@ public class BookController {
            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
        }
     }
-    //what to do if a user lost a book
+
+    //what to do if a user lost a book?
+    //can be reported while retuning the book
 }

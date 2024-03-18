@@ -41,6 +41,10 @@ public class Records {
     private BookRecordStatus status;
 
     public void calculateFine() {
+        if(status == BookRecordStatus.LOST) {
+            fine = BigDecimal.valueOf(1000.0);
+            return;
+        }
         BigDecimal finePerDay = BigDecimal.valueOf(10); // 10 taka
         int overdueDays;
         if (returnTime == null) {

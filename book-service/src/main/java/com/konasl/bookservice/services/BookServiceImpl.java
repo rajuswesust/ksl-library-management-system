@@ -176,6 +176,7 @@ public class BookServiceImpl implements BookService{
             Long adminId = lendBookRequest.getAdmin_id();
             Long userId = lendBookRequest.getInfo().getUser_id();
             Long bookId = lendBookRequest.getInfo().getBook_id();
+            Boolean is_lost = lendBookRequest.getInfo().getIs_lost();
 
             // Check if the admin exists
             String adminUrl = userServiceUrl + "/" + adminId;
@@ -204,8 +205,9 @@ public class BookServiceImpl implements BookService{
             if(filteredRecords.size() != 1) {
                 throw new CustomException(HttpStatus.BAD_REQUEST, new Message("No such previous record found"));
             }
+            BookRecordStatus bookRecordStatus = is_lost ? BookRecordStatus.LOST : BookRecordStatus.RETURNED;
             filteredRecords.get(0).setReturnTime(LocalDate.now());
-            filteredRecords.get(0).setStatus(BookRecordStatus.RETURNED);
+            filteredRecords.get(0).setStatus(bookRecordStatus);
             filteredRecords.get(0).calculateFine();
             recordsRepository.save(filteredRecords.get(0));
 
