@@ -4,14 +4,19 @@ import com.konasl.userservice.payload.*;
 import com.konasl.userservice.entity.User;
 import com.konasl.userservice.service.UserService;
 import com.konasl.userservice.exception.ExceptionClass;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+//@Validated // Enable validation for all methods within this controller
 public class UserController {
 
     private UserService userService;
@@ -26,8 +31,8 @@ public class UserController {
     }
 
     @PostMapping("/sign-up")
-    public ResponseEntity<?> register(@RequestBody User user) {
-        try {
+    public ResponseEntity<?> register(@Valid @RequestBody User user) {
+         try {
             System.out.println("new registering user: " + user);
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(user));
         } catch (ExceptionClass e) {

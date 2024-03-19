@@ -6,6 +6,7 @@ import com.konasl.bookservice.payload.LendReturnBookRequest;
 import com.konasl.bookservice.payload.Message;
 import com.konasl.bookservice.payload.WishlistRequest;
 import com.konasl.bookservice.services.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +24,7 @@ public class BookController {
     //add books
     //only admin access
     @PostMapping("/add")
-    public ResponseEntity<?> addBook(@RequestBody Book book) {
+    public ResponseEntity<?> addBook(@Valid @RequestBody Book book) {
         try {
             System.out.println("add book: " + book);
             return ResponseEntity.status(HttpStatus.CREATED).body(bookService.addBook(book));

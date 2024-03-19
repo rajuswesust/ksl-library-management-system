@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,8 +40,9 @@ public class UserServiceImpl implements UserService{
             throw new ExceptionClass(HttpStatus.BAD_REQUEST,
                     new Message("User with the same username or email already exists"));
         }
-        String currentDateTime = String.valueOf(LocalDateTime.now());
-        user.setJoinedAt(currentDateTime);
+//        String currentDateTime = String.valueOf(LocalDateTime.now());
+//        user.setJoinedAt(currentDateTime);
+        user.setJoinedAt(LocalDateTime.now());
         User newUser = userRepository.save(user);
         return toUserDto(user);
     }
@@ -135,7 +137,7 @@ public class UserServiceImpl implements UserService{
         newUserDto.setLastName(newUser.getLastName());
         newUserDto.setUsername(newUser.getUsername());
         newUserDto.setEmail(newUser.getEmail());
-        newUserDto.setJoinedAt(newUser.getJoinedAt());
+        newUserDto.setJoinedAt(String.valueOf(newUser.getJoinedAt()));
         newUserDto.setUserImage(newUser.getUserImage());
         newUserDto.setPhoneNumber(newUser.getPhoneNumber());
         return newUserDto;
