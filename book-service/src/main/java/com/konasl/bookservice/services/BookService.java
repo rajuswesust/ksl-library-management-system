@@ -17,7 +17,7 @@ public interface BookService {
     Book getBookById(Long id) throws CustomException;
 
     Message updateBook(Long id, Book book) throws CustomException;
-    Object addBookToWishlist(WishlistRequest wishlistRequest);
+    Object addBookToWishlist(WishlistRequest wishlistRequest) throws CustomException;
     Message removeBookFromWishlist(WishlistRequest wishlistRequest) throws CustomException;
     Message lendBook(LendReturnBookRequest lendBookRequest) throws CustomException;
     BookReturnResponse returnBook(LendReturnBookRequest lendBookRequest) throws CustomException;

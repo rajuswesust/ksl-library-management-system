@@ -18,11 +18,9 @@ public class WishList {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    // Define Many-to-One relationship with Book entity
     @ManyToOne
-    @JoinColumn(name = "book_id") // This column will hold the foreign key to Book
+    @JoinColumn(name = "book_id")
     private Book book;
 
-    @ElementCollection
-    private List<Long> userIds;
+    Long userId;
 }

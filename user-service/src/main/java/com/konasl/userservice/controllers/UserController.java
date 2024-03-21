@@ -34,6 +34,7 @@ public class UserController {
     public ResponseEntity<?> register(@Valid @RequestBody User user) {
          try {
             System.out.println("new registering user: " + user);
+            userService.test();
             return ResponseEntity.status(HttpStatus.CREATED).body(userService.registerUser(user));
         } catch (ExceptionClass e) {
             System.out.println(e);

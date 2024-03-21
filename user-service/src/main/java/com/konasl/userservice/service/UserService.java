@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface UserService {
+    int test();
     UserDto registerUser(User user) throws ExceptionClass;
     UserDto getUser(Long id) throws ExceptionClass;
     List<UserDto> getAllUser();
@@ -15,7 +16,7 @@ public interface UserService {
 
     Message updateUser(Long userId, UserDto userDto) throws ExceptionClass;
 
-    ResponseEntity<String> addToWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
-    ResponseEntity<String> removeBookFromWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
+    Message addToWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
+    Message removeBookFromWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
 
 }

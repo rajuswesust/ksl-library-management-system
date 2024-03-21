@@ -85,24 +85,20 @@ public class BookServiceImpl implements BookService{
     }
 
     @Override
-    public Object addBookToWishlist(WishlistRequest wishlistRequest) throws CustomException{
+    public Message addBookToWishlist(WishlistRequest wishlistRequest) throws CustomException{
         System.out.println("book service: "+ wishlistRequest);
 
-        // Retrieve the Book object by its ID
+        // Retrieve the Book and Check if it exists
         Book book = bookRepository.findById(wishlistRequest.getBookId()).orElseThrow(
                 ()->   new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + wishlistRequest.getBookId() + " does not exists"))
         );
-
-        WishList existingList = wishlistRepository.findByBookId(book.getId());
-        WishList newList = WishList.builder().book(book).build();
-        if(existingList == null) {
-            newList.setUserIds(Collections.singletonList(wishlistRequest.getUserId()));
-            wishlistRepository.save(newList);
+        Long userId = wishlistRequest.getUserId();
+        WishList existingRecord = wishlistRepository.findByBookIdAndUserId(book.getId(), userId);
+        WishList newRecord = WishList.builder().book(book).userId(userId).build();
+        if(existingRecord != null) {
+            throw new CustomException(HttpStatus.CONFLICT, new Message("This book is already in the wishlist"));
         }
-        else  {
-            existingList.getUserIds().add(wishlistRequest.getUserId());
-            wishlistRepository.save(existingList);
-        }
+        wishlistRepository.save(newRecord);
         return new Message(book.getTitle() + ", is added to the wishlist!");
     }
 
@@ -116,12 +112,11 @@ public class BookServiceImpl implements BookService{
                 ()->   new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " does not exists"))
         );
 
-        WishList existingList = wishlistRepository.findByBookId(book.getId());
-        if(existingList == null) {
+        WishList existingRecord = wishlistRepository.findByBookIdAndUserId(book.getId(), userId);
+        if(existingRecord == null) {
             throw new CustomException(HttpStatus.NOT_FOUND, new Message("Book with id: " + bookId + " is not in users wishlist"));
         }
-        existingList.getUserIds().remove(userId);
-        wishlistRepository.save(existingList);
+        wishlistRepository.delete(existingRecord);
         return new Message(book.getTitle() + ", is removed from wishlist!");
     }
 

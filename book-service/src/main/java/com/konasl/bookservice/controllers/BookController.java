@@ -70,7 +70,11 @@ public class BookController {
     @PostMapping("/user-wishlist/add")
     public ResponseEntity<?> addUserWishlist(@RequestBody WishlistRequest wishlistRequest) {
         System.out.println(wishlistRequest);
-        return ResponseEntity.ok(bookService.addBookToWishlist(wishlistRequest));
+        try {
+            return ResponseEntity.ok(bookService.addBookToWishlist(wishlistRequest));
+         } catch (CustomException e) {
+            return new ResponseEntity<>(e.getErrorMessage(), e.getStatus());
+        }
     }
 
     //remove a book from wishlist

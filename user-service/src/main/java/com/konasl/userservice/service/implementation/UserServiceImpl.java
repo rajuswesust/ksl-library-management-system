@@ -1,10 +1,16 @@
 package com.konasl.userservice.service.implementation;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.konasl.userservice.payload.*;
 import com.konasl.userservice.exception.ExceptionClass;
 import com.konasl.userservice.entity.User;
 import com.konasl.userservice.repository.UserRepository;
 import com.konasl.userservice.service.UserService;
+import jakarta.validation.constraints.NotNull;
+import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -19,19 +25,30 @@ import java.util.Collections;
 import java.util.List;
 
 @Service
+@NoArgsConstructor
 public class UserServiceImpl implements UserService{
+    @Autowired
     private UserRepository userRepository;
+    @Autowired
     private ModelMapper modelMapper;
+
+    private int testVal = 0;
+
+    @Override
+    public int test() {
+        System.out.println(++testVal);
+        return testVal;
+    }
 
     @Autowired
     private RestTemplate restTemplate;
 
     private final String bookServiceURL = "http://localhost:8082/api/books";
 
-    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
-    }
+//    public UserServiceImpl(UserRepository userRepository, ModelMapper modelMapper) {
+//        this.userRepository = userRepository;
+//        this.modelMapper = modelMapper;
+//    }
 
 
     @Override
@@ -92,7 +109,7 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public ResponseEntity<String> addToWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
+    public  Message addToWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
         if(!userRepository.existsById(userId)) {
             throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
         }
@@ -104,13 +121,18 @@ public class UserServiceImpl implements UserService{
         HttpEntity<WishlistRequest> entity = new HttpEntity<>(req, headers);
 
         System.out.println("requesting to "+ url +": "+ req);
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-        System.out.println(response);
-        return response;
+        try {
+            ResponseEntity<Message> response = restTemplate.exchange(url, HttpMethod.POST, entity, Message.class);
+            System.out.println(response.getBody());
+            return response.getBody();
+         } catch (HttpClientErrorException e) {
+            System.out.println(e.getMessage());
+            throw getResponseForError(e);
+        }
     }
 
     @Override
-    public ResponseEntity<String> removeBookFromWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
+    public Message removeBookFromWishlist(UserWishlistRequest userWishlistRequest, Long userId) throws ExceptionClass {
         if(!userRepository.existsById(userId)) {
             throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
         }
@@ -123,11 +145,11 @@ public class UserServiceImpl implements UserService{
 
         System.out.println("requesting to "+ url +": "+ req);
         try {
-            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            ResponseEntity<Message> response = restTemplate.exchange(url, HttpMethod.POST, entity, Message.class);
             System.out.println(response);
-            return response;
+            return response.getBody();
         } catch (HttpClientErrorException e) {
-            throw new ExceptionClass((HttpStatus) e.getStatusCode(), new Message("Error occurred while removing book from wishlist"));
+            throw getResponseForError(e);
         }
     }
 
@@ -141,5 +163,16 @@ public class UserServiceImpl implements UserService{
         newUserDto.setUserImage(newUser.getUserImage());
         newUserDto.setPhoneNumber(newUser.getPhoneNumber());
         return newUserDto;
+    }
+    private ExceptionClass getResponseForError(HttpClientErrorException e) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode jsonResponse = null;
+        try {
+            jsonResponse = objectMapper.readTree(e.getResponseBodyAs(String.class));
+        } catch (JsonProcessingException ex) {
+            return new ExceptionClass(HttpStatus.INTERNAL_SERVER_ERROR, new Message("Something went wrong!"));
+        }
+        String messageContent = jsonResponse.get("message").asText();
+        return new ExceptionClass((HttpStatus) e.getStatusCode(), new Message(messageContent));
     }
 }
