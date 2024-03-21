@@ -89,6 +89,16 @@ public class BookController {
         }
     }
 
+    //user wishlist by id
+    @GetMapping("/user-wishlist/{id}")
+    public ResponseEntity<?> getWishlistByUser(@PathVariable(name = "id") Long userId) {
+        try {
+            return ResponseEntity.ok(bookService.getWishlistByUser(userId));
+        } catch (CustomException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getErrorMessage());
+        }
+    }
+
     //admin
     //lend a book to user
     //here id is the admins user' id

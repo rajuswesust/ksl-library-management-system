@@ -19,4 +19,6 @@ public interface UserService {
     Message addToWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
     Message removeBookFromWishlist(UserWishlistRequest wishlistRequest, Long userId) throws ExceptionClass;
 
+    List<UserWishlistResponse> getUserWishlist(Long userId) throws ExceptionClass;
+
 }

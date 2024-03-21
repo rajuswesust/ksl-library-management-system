@@ -93,5 +93,11 @@ public class UserController {
         }
     }
 
+    //get the users wishlist
+    @GetMapping("/{id}/wishlist")
+    public ResponseEntity<?> getUserWishlist(@PathVariable(name = "id") Long userId) {
+        return ResponseEntity.ok(userService.getUserWishlist(userId));
+    }
+
     //show user's borrowed books records
 }

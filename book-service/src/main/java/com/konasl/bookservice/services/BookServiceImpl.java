@@ -5,10 +5,7 @@ import com.konasl.bookservice.entity.Records;
 import com.konasl.bookservice.entity.WishList;
 import com.konasl.bookservice.enums.BookRecordStatus;
 import com.konasl.bookservice.exceptions.CustomException;
-import com.konasl.bookservice.payload.BookReturnResponse;
-import com.konasl.bookservice.payload.LendReturnBookRequest;
-import com.konasl.bookservice.payload.Message;
-import com.konasl.bookservice.payload.WishlistRequest;
+import com.konasl.bookservice.payload.*;
 import com.konasl.bookservice.repository.BookRepository;
 import com.konasl.bookservice.repository.RecordsRepository;
 import com.konasl.bookservice.repository.WishlistRepository;
@@ -20,6 +17,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -118,6 +116,19 @@ public class BookServiceImpl implements BookService{
         }
         wishlistRepository.delete(existingRecord);
         return new Message(book.getTitle() + ", is removed from wishlist!");
+    }
+
+    @Override
+    public List<UserWishlistResponse> getWishlistByUser(Long userId) throws CustomException {
+        List<WishList> list = wishlistRepository.findAllByUserId(userId);
+        List<UserWishlistResponse> userWishlist = new ArrayList<>();
+        list.forEach(it -> {
+            System.out.println(it);
+            Book curr = it.getBook();
+            userWishlist.add(UserWishlistResponse.builder().bookId(curr.getId()).title(curr.getTitle()).bookType(curr.getBookType())
+                    .isbn(curr.getIsbn()).author(curr.getAuthor()).releaseYear(curr.getReleaseYear()).build());
+        });
+        return userWishlist;
     }
 
     @Override

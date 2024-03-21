@@ -9,10 +9,12 @@ import com.konasl.userservice.exception.ExceptionClass;
 import com.konasl.userservice.entity.User;
 import com.konasl.userservice.repository.UserRepository;
 import com.konasl.userservice.service.UserService;
+import jakarta.validation.constraints.Negative;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -147,6 +149,25 @@ public class UserServiceImpl implements UserService{
         try {
             ResponseEntity<Message> response = restTemplate.exchange(url, HttpMethod.POST, entity, Message.class);
             System.out.println(response);
+            return response.getBody();
+        } catch (HttpClientErrorException e) {
+            throw getResponseForError(e);
+        }
+    }
+
+    @Override
+    public List<UserWishlistResponse> getUserWishlist(Long userId) throws ExceptionClass{
+        if(!userRepository.existsById(userId)) {
+            throw new ExceptionClass(HttpStatus.BAD_REQUEST, new Message("User with id : " + userId + " does not exists"));
+        }
+        String url = bookServiceURL + "/user-wishlist/" + userId;
+        HttpHeaders headers = new HttpHeaders();
+        HttpEntity<?> entity = new HttpEntity<>(headers);
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        try {
+            ResponseEntity<List<UserWishlistResponse>> response = restTemplate.exchange(url, HttpMethod.GET, entity,
+                    new ParameterizedTypeReference<List<UserWishlistResponse>>() {});
             return response.getBody();
         } catch (HttpClientErrorException e) {
             throw getResponseForError(e);
