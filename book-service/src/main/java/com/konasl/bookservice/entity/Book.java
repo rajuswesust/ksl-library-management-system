@@ -38,11 +38,11 @@ public class Book {
     @NotEmpty(message = "book-type is required")
     private String bookType;    //Genre or category
 
-    @Min(value = 0, message = "Quantity must be greater than or equal to 0")
+    @Min(value = 1, message = "Quantity must be greater than or equal to 0")
     private int quantity;
 
     @NotNull(message = "available copies is required")
-    @Min(value = 1, message = "available copies must be greater than 0")
+    @Min(value = 0, message = "available copies must be greater than 0")
     private int availableCopies;
 
     @NotNull(message = "isAvailable is required")
